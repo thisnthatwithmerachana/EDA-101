@@ -1,0 +1,26 @@
+import seaborn as sns
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+main_df=sns.load_dataset('titanic',sep='\s*,\s*', engine='python')
+main_df=pd.DataFrame(data=main_df)
+full_df=sns.load_dataset('titanic',sep='\s*,\s*', engine='python')
+full_df=pd.DataFrame(data=full_df)
+print(full_df.head(10))
+main_df.drop('alive',axis=1,inplace=True)
+target_df = pd.DataFrame(main_df, columns=['survived'])
+main_df.drop('survived',axis=1,inplace=True)
+print(target_df.sample(10))
+main_df.columns = main_df.columns.str.strip()
+target_df.columns = target_df.columns.str.strip()
+#pip install category_encoders
+import category_encoders
+enc=category_encoders.target_encoder.TargetEncoder(verbose=0,cols=['embark_town'],drop_invariant=False, return_df=True,min_samples_leaf=1,smoothing=1.0).fit_transform(main_df,target_df)
+print('Target Encoding', enc)
+enc=category_encoders.leave_one_out.LeaveOneOutEncoder(cols=['embark_town']).fit_transform(main_df,target_df)
+print('Leave One Out Encoding',enc)
+from category_encoders.hashing import HashingEncoder
+he = HashingEncoder(cols = ['embark_town'],n_components=2,drop_invariant=False )#(default is 8#drop columns with 0 variance)#we reduced 3 to 2 say we had 20 then we can condense it to 8
+print(main_df['embark_town'].nunique())
+new_he = he.fit_transform(main_df,target_df)
+print('Hashing ',new_he.sample(10))
